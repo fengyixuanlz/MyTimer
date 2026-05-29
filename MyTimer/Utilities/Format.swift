@@ -19,3 +19,10 @@ enum TimerType {
     case concentrate
     case rest
 }
+
+enum SetTimeForDefault: Int, Codable {
+    case DevelopmentConTime = 5
+    case DevelopmentRestTime = 3
+    case ProductionConTime = 1500
+    case ProductionRestTime = 300
+}

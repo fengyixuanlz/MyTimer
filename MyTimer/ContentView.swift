@@ -8,14 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    // 集中timer
+    /// 集中timer
     @State private var concentrate_timerHandler: Timer?
-    var totalConcentrateTime = 1500 // UserDefaults
     @State private var concentrateCount = 0 // もう走った時間 - 集中
     
-    // 休憩timer
+    /// 休憩timer
     @State private var rest_timerHandler: Timer?
-    var totalRestTime = 300 // UserDefaults
     @State var restCount = 0 // もう走った時間 - 休憩
     
     @State private var currentState = TimerType.concentrate
@@ -25,6 +23,8 @@ struct ContentView: View {
     
     @State private var isConRunning = false
     @State private var isRestRunning = false
+    
+    @State private var selectedVersion = 1 // 0 は　開発　｜１はリリース版
     
     let middleCircleSize = 330.0 // 大きい丸の大きさ
     let smallCircleSize = 306.0 // 大きい丸の大きさ
@@ -44,14 +44,15 @@ struct ContentView: View {
                         currentState == .concentrate ? isConRunning
                             : isRestRunning)
                         .frame(width: middleCircleSize, height: middleCircleSize)
+                        .padding(.top, 40)
                     
                     // 丸の中で内容の設定する
                     VStack {
                         switch currentState {
                         case TimerType.concentrate:
-                            ConcentrateCircle(remainingTime: totalConcentrateTime - concentrateCount)
+                            ConcentrateCircle(remainingTime: setTimerBySelectedVersion(currentState) - concentrateCount)
                         case TimerType.rest:
-                            ResetCircle(remainingTime: totalRestTime - restCount)
+                            ResetCircle(remainingTime: setTimerBySelectedVersion(currentState) - restCount)
                         }
                     }
                 }
@@ -65,16 +66,11 @@ struct ContentView: View {
                         currentState = TimerType.concentrate
                         startConcentrateTimer()
                     } label: {
-                        Image(systemName: "clock.fill")
-                            .foregroundColor(.white)
+                        Image(.tomato)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30)
                         Text("集中")
-                            .alert("まもなく終了します",
-                                   isPresented: $isShowAlert)
-                            {
-                                Button("OK") {}
-                            } message: {
-                                Text("あと5秒です")
-                            }
                     }
                     .mainButtonStyle()
                     Spacer()
@@ -98,14 +94,16 @@ struct ContentView: View {
                     HStack {
                         Spacer()
                         HStack {
+                            Image(systemName: "lightbulb.fill")
+                                .foregroundColor(.mainColor01)
                             Text("集中：")
-                            if totalConcentrateTime>=60 {
-                                Text("\(totalConcentrateTime / 60)")
+                            if setTimerBySelectedVersion(.concentrate) >= 60 {
+                                Text("\(setTimerBySelectedVersion(.concentrate) / 60)")
                                     .foregroundStyle(Color.mainColor01)
                                     .font(.title2)
                                 Text("分")
                             } else {
-                                Text("\(totalConcentrateTime)")
+                                Text("\(setTimerBySelectedVersion(.concentrate))")
                                     .foregroundStyle(Color.mainColor01)
                                     .font(.title2)
                                 Text("秒")
@@ -114,13 +112,13 @@ struct ContentView: View {
                         Spacer()
                         HStack {
                             Text("休憩：")
-                            if totalRestTime>=60 {
-                                Text("\(totalRestTime / 60)")
+                            if setTimerBySelectedVersion(.rest) >= 60 {
+                                Text("\(setTimerBySelectedVersion(.rest) / 60)")
                                     .foregroundStyle(Color.mainColor02)
                                     .font(.title2)
                                 Text("分")
                             } else {
-                                Text("\(totalRestTime)")
+                                Text("\(setTimerBySelectedVersion(.rest))")
                                     .foregroundStyle(Color.mainColor02)
                                     .font(.title2)
                                 Text("秒")
@@ -129,7 +127,8 @@ struct ContentView: View {
                         Spacer()
                     }
                     Text("ボタンを押すとカウントダウンが始まります")
-                        .foregroundColor(Color.fontColor01)
+                        .foregroundColor(Color.fontColor01.opacity(0.5))
+                        .padding(.top, 10)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, horizontalPadding - 10)
@@ -144,13 +143,27 @@ struct ContentView: View {
                 .padding(horizontalPadding)
             }
             .ignoresSafeArea()
+            .alert("まもなく終了します",
+                   isPresented: $isShowAlert)
+            {
+                Button("OK") {}
+            } message: {
+                Text("あと\(alertMessageText)です")
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
-                        SettingView()
+                        SettingView(selectedVersion: $selectedVersion)
                     } label: {
-                        Label("時間設定", systemImage: "slider.horizontal.3")
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.body)
+                            .foregroundColor(.primary)
                     }
+                }
+                ToolbarItem(placement: .topBarLeading) {
+                    Text("26CM0128 封怡璇")
+                        .frame(width: 200)
+                        .foregroundColor(.secondary)
                 }
             }
         }
@@ -160,11 +173,11 @@ struct ContentView: View {
     
     func concentrateCountDownTimer() {
         concentrateCount += 1
-        if totalConcentrateTime - concentrateCount == 5 {
+        if setTimerBySelectedVersion(.concentrate) - concentrateCount == 0 {
             isShowAlert = true
         }
         
-        if totalConcentrateTime - concentrateCount <= 0 {
+        if setTimerBySelectedVersion(.concentrate) - concentrateCount <= 0 {
             InitailCon()
         }
     }
@@ -174,7 +187,7 @@ struct ContentView: View {
             return
         }
         
-        if totalConcentrateTime - concentrateCount <= 0 {
+        if setTimerBySelectedVersion(.concentrate) - concentrateCount <= 0 {
             concentrateCount = 0
         }
         
@@ -203,22 +216,22 @@ struct ContentView: View {
 
     func restCountDownTimer() {
         restCount += 1
-        if totalRestTime - restCount == 5 {
+        if setTimerBySelectedVersion(.rest) - restCount == 0 {
             isShowAlert = true
         }
-        if totalRestTime - restCount <= 0 {
+        if setTimerBySelectedVersion(.rest) - restCount <= 0 {
             InitailRest()
         }
     }
     
     func startRestTimer() {
-        if let th = rest_timerHandler { // 它在检查：timerHandler 里现在有定时器对象吗？
-            if th.isValid == true { // 检查这个定时器是否正在运行（isValid）
+        if let th = rest_timerHandler {
+            if th.isValid == true {
                 return
             }
         }
         
-        if totalRestTime - restCount <= 0 {
+        if setTimerBySelectedVersion(.rest) - restCount <= 0 {
             restCount = 0
         }
         
@@ -229,6 +242,28 @@ struct ContentView: View {
                 restCountDownTimer()
             }
         })
+    }
+    
+    /// 開発版の中に、集中と休憩二つモードがあります
+    /// リリース版の中に、集中と休憩二つモードがあります
+    func setTimerBySelectedVersion(_ currentState: TimerType) -> Int {
+        switch selectedVersion {
+        case 0: // development
+            return currentState == .concentrate ? (SetTimeForDefault.DevelopmentConTime.rawValue) : (SetTimeForDefault.DevelopmentRestTime.rawValue)
+        default:
+            return currentState == .concentrate ? (SetTimeForDefault.ProductionConTime.rawValue) : (SetTimeForDefault.ProductionRestTime.rawValue)
+        }
+    }
+    
+    var alertMessageText: String {
+        let remainTime = setTimerBySelectedVersion(currentState)
+        
+        // もし時間が 60分 より大きい、分です、あるいは　秒です
+        if remainTime > 60 {
+            return "あと \(remainTime / 60) 分です"
+        } else {
+            return "あと \(remainTime) 秒です"
+        }
     }
 }
 

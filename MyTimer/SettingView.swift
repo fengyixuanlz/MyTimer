@@ -8,68 +8,64 @@
 import SwiftUI
 
 struct SettingView: View {
-    @AppStorage("totalConcentrateTime") private var totalConcentrateTime = 25
-    @AppStorage("totalRestTime") private var totalRestTime = 5
+    @Binding var selectedVersion: Int
+
     var body: some View {
         ZStack {
             LinearGradient(colors: [Color.mainColor01.opacity(0.25), Color.mainColor02.opacity(0.25)],
                            startPoint: .topLeading,
                            endPoint: .bottomTrailing)
                 .ignoresSafeArea()
-            VStack {
-                Spacer()
-                VStack {
-                    Text("集中時間設定：\(totalConcentrateTime)分")
-                        .font(.largeTitle)
-                        .foregroundStyle(.mainColor01)
-                    Picker(selection: $totalConcentrateTime) {
-                        ForEach(20..<65) { index in
-                            if index % 5 == 0 {
-                                Text("\(index)")
-                                    .tag(index)
-                            }
-                        }
-                    } label: {
-                        Text("選択してください")
-                    }
-                    .pickerStyle(.wheel)
+            VStack(spacing: 12) {
+                Text("モード設定")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Picker("バージョン選択", selection: $selectedVersion) {
+                    Text("🛠️ 開発版").tag(0)
+                    Text("🚀 リリース").tag(1)
                 }
-                .padding()
-                .background(Color.bg)
-                .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                .padding(.horizontal)
-                
-                Divider()
-                Spacer()
-                
-                VStack {
-                    Text("休憩時間設定：\(totalRestTime)分")
-                        .font(.largeTitle)
-                        .foregroundStyle(.mainColor02)
-                    Picker(selection: $totalRestTime) {
-                        ForEach(5..<25) { index in
-                            if index % 5 == 0 {
-                                Text("\(index)")
-                                    .tag(index)
-                            }
+                .scaleEffect(1.2)
+                .pickerStyle(.segmented) // 变成好看的胶囊滑块样式
+                .frame(height: 100)
+                .padding(.horizontal, 30)
+
+                HStack(spacing: 20) {
+                    if selectedVersion == 0 {
+                        // リリース
+                        Label {
+                            Text("集中: \(SetTimeForDefault.DevelopmentConTime.rawValue)秒")
+                        } icon: {
+                            Image("tomato")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 15, height: 15)
                         }
-                    } label: {
-                        Text("選択してください")
+                        Label("休憩: \(SetTimeForDefault.DevelopmentRestTime.rawValue)秒", systemImage: "leaf.fill")
+                    } else {
+                        // 開発
+                        Label {
+                            Text("集中: \(SetTimeForDefault.ProductionConTime.rawValue / 60)分")
+                        } icon: {
+                            Image("tomato")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 15, height: 15)
+                        }
+                        Label("休憩: \(SetTimeForDefault.ProductionRestTime.rawValue / 60)分", systemImage: "leaf.fill")
                     }
-                    .pickerStyle(.wheel)
                 }
-                .padding()
-                .background(Color.bgColor01)
-                .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                .padding(.horizontal)
-                Divider()
+                .font(.footnote)
+                .foregroundColor(.secondary)
             }
+            .padding()
+            .background(Color(.systemBackground).opacity(0.8))
+            .cornerRadius(12)
+            .padding()
         }
     }
 }
 
 #Preview {
-    SettingView()
+    @Previewable @State var tempVersion = 0
+    SettingView(selectedVersion: $tempVersion)
 }

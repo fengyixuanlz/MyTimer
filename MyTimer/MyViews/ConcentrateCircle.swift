@@ -12,8 +12,10 @@ struct ConcentrateCircle: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: "clock.fill")
-                .foregroundStyle(Color.mainColor01)
+            Image(.tomato)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30)
             Text("集中モード")
                 .font(.title2)
                 .fontWeight(.bold)
@@ -30,10 +32,10 @@ struct ConcentrateCircle: View {
                 .padding(.horizontal, 12)
                 .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.bg) // 1. 先用背景色填满这个圆角矩形
+                            .fill(Color.bg)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.mainColor01, lineWidth: 1) // 2. 再给这个圆角矩形描个边
+                                    .stroke(Color.mainColor01, lineWidth: 1)
                             )
                     )
         }
