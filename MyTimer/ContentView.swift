@@ -143,12 +143,12 @@ struct ContentView: View {
                 .padding(horizontalPadding)
             }
             .ignoresSafeArea()
-            .alert("まもなく終了します",
+            .alert("",
                    isPresented: $isShowAlert)
             {
                 Button("OK") {}
             } message: {
-                Text("あと\(alertMessageText)です")
+                Text("\(currentState == .concentrate ? "お疲れさまでした！休憩しましょう" : "休憩終了です！次の集中を始めましょう")")
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -255,16 +255,16 @@ struct ContentView: View {
         }
     }
     
-    var alertMessageText: String {
-        let remainTime = setTimerBySelectedVersion(currentState)
-        
-        // もし時間が 60分 より大きい、分です、あるいは　秒です
-        if remainTime > 60 {
-            return "あと \(remainTime / 60) 分です"
-        } else {
-            return "あと \(remainTime) 秒です"
-        }
-    }
+//    var alertMessageText: String {
+//        let remainTime = setTimerBySelectedVersion(currentState)
+//        
+//        // もし時間が 60分 より大きい、分です、あるいは　秒です
+//        if remainTime > 60 {
+//            return "あと \(remainTime / 60) 分です"
+//        } else {
+//            return "あと \(remainTime) 秒です"
+//        }
+//    }
 }
 
 #Preview {
